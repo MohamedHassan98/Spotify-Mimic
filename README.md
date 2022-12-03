@@ -10,8 +10,8 @@
 
 ### Table of Contents
 
-- [Note](#⚠️-note)
-- [Technical Overview](#%EF%B8%8F-note)
+- [Note](#%EF%B8%8F-note)
+- [Technical Overview](#-technical-overview-for-the-project)
 - [General Overview](#-general-overview-for-the-project)
 - [Screenshots](#-pictures-of-the-website)
 - [To Do](#-to-do)
