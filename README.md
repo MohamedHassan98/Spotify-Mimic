@@ -11,10 +11,10 @@
 ### Table of Contents
 
 - [Note](#⚠️-note)
-- [Technical Overview](#👨‍💻-technical-overview-for-the-project)
-- [General Overview](#🌍-general-overview-for-the-project)
-- [Screenshots](#📄-pictures-of-the-website)
-- [To Do](#📋-to-do)
+- [Technical Overview](#%EF%B8%8F-note)
+- [General Overview](#-general-overview-for-the-project)
+- [Screenshots](#-pictures-of-the-website)
+- [To Do](#-to-do)
 
 ## ⚠️ Note
 
