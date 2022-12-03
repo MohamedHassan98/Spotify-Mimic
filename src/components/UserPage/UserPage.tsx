@@ -1,4 +1,4 @@
-import { Box, Stack, Grid, GridItem, Image } from "@chakra-ui/react";
+import { Box, Stack, Grid, GridItem, Image, Heading } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
@@ -94,10 +94,13 @@ const UserPage: React.FC = () => {
                       : null}
                   </Box>
                   <Box>
-                    &nbsp; &#8226;{" "}
                     {userProfileData?.followers.total > 1
-                      ? userProfileData?.followers.total.toLocaleString() +
-                        " Followers"
+                      ? (
+                          <>
+                            &nbsp; &#8226;{" "}
+                            {userProfileData?.followers.total.toLocaleString()}{" "}
+                          </>
+                        ) + " Followers"
                       : userProfileData?.followers.total === 1
                       ? "1 Follower"
                       : null}
@@ -106,27 +109,45 @@ const UserPage: React.FC = () => {
               </Grid>
               {idParam.id === localStorage.getItem("userId") ? (
                 <>
-                  <HomePageGrid
-                    GridHeader="Top Played Artists"
-                    GridData={userTopArtists}
-                    GridSeeAll={false}
-                    GridType="artists"
-                  />
-                  <HomePageGrid
-                    GridHeader="Top Played Tracks"
-                    GridData={userTopTracks}
-                    GridSeeAll={false}
-                    GridType="tracks"
-                  />
+                  {userTopArtists.total > 0 ? (
+                    <HomePageGrid
+                      GridHeader="Top Played Artists"
+                      GridData={userTopArtists}
+                      GridSeeAll={false}
+                      GridType="artists"
+                    />
+                  ) : (
+                    <Heading color="white" as="h2" size="sm">
+                      No top played artists yet
+                    </Heading>
+                  )}
+                  {userTopTracks.total > 0 ? (
+                    <HomePageGrid
+                      GridHeader="Top Played Tracks"
+                      GridData={userTopTracks}
+                      GridSeeAll={false}
+                      GridType="tracks"
+                    />
+                  ) : (
+                    <Heading color="white" as="h2" size="sm">
+                      No top played tracks yet
+                    </Heading>
+                  )}
                 </>
               ) : null}
-              <HomePageGrid
-                GridHeader="Public Playlists"
-                //@ts-ignore
-                GridData={userPlaylistsData}
-                GridSeeAll={false}
-                GridType="playlist"
-              />
+              {userPlaylistsData.total > 0 ? (
+                <HomePageGrid
+                  GridHeader="Public Playlists"
+                  //@ts-ignore
+                  GridData={userPlaylistsData}
+                  GridSeeAll={false}
+                  GridType="playlist"
+                />
+              ) : (
+                <Heading color="white" as="h2" size="sm">
+                  No public playlists yet
+                </Heading>
+              )}
             </Stack>
           ) : null
         }

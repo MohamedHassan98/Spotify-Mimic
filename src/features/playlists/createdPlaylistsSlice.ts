@@ -25,6 +25,7 @@ interface createdPlaylistsState {
   loadingCreatedPlaylistsData: boolean;
   error: string | null;
   createdPlaylistsData: {
+    total: number;
     items: {
       name: string;
       collaborative: boolean;

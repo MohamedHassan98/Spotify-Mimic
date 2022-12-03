@@ -73,8 +73,8 @@ const HomePage: React.FC = () => {
           minChildWidth={{ base: "200px", sm: "300px", md: "400px" }}
           spacing={10}
         >
-          {createdPlaylistsData ? (
-            createdPlaylistsData.items.slice(0, 6).map((item) => (
+          {createdPlaylistsData && createdPlaylistsData?.total > 0 ? (
+            createdPlaylistsData?.items.slice(0, 6).map((item) => (
               <Box
                 key={item.id}
                 display={"flex"}

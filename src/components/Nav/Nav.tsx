@@ -154,7 +154,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </NavItem>
       ))}
       <>
-        {createdPlaylistsData ? (
+        {createdPlaylistsData && createdPlaylistsData?.total > 0 ? (
           <>
             <Heading
               as="h1"

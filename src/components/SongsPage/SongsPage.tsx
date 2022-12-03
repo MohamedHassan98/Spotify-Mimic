@@ -387,8 +387,10 @@ const SongsPage: React.FC = () => {
                       ? albumDetails?.total_tracks > 1
                         ? albumDetails?.total_tracks + " songs"
                         : albumDetails?.total_tracks + " song"
-                      : likedSongsIndicator
-                      ? likedSongsPlaylist?.total + " songs"
+                      : likedSongsIndicator && likedSongsPlaylist
+                      ? likedSongsPlaylist?.total > 1
+                        ? likedSongsPlaylist?.total + " songs"
+                        : likedSongsPlaylist?.total + " song"
                       : null}
                   </Box>
                 </GridItem>
