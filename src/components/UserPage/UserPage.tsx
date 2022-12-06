@@ -1,11 +1,22 @@
-import { Box, Stack, Grid, GridItem, Image, Heading } from "@chakra-ui/react";
+import {
+  Box,
+  Stack,
+  Grid,
+  GridItem,
+  Image,
+  Heading,
+  Button,
+} from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
 import { getUserProfile } from "../../features/users/userProfileSlice";
 import { getUserPlaylists } from "../../features/playlists/userPlaylistsSlice";
 import { getUserTopArtists } from "../../features/users/userTopArtistsSlice";
 import { getUserTopTracks } from "../../features/users/userTopTracksSlice";
+import { isFollowingUser } from "../../features/users/isFollowingUserSlice";
+import { followUser } from "../../features/users/followUser";
+import { unfollowUser } from "../../features/users/unfollowUser";
 import SidebarWithHeader from "../Nav/Nav";
 import HomePageGrid from "../HomePageGrid/HomePageGrid";
 import UserProfileDefault from "../../assets/UserProfileDefault.png";
@@ -13,6 +24,7 @@ import UserProfileDefault from "../../assets/UserProfileDefault.png";
 const UserPage: React.FC = () => {
   const idParam = useParams();
   const dispatch = useAppDispatch();
+  const [followIndicator, setFollowIndicator] = useState(false);
 
   useEffect(() => {
     let userId = idParam?.id;
@@ -23,8 +35,11 @@ const UserPage: React.FC = () => {
       );
       dispatch(getUserTopArtists());
       dispatch(getUserTopTracks());
+      if (idParam.id !== localStorage.getItem("userId")) {
+        dispatch(isFollowingUser(`${idParam.id}`));
+      }
     }
-  }, [idParam.id]);
+  }, [idParam.id, followIndicator]);
 
   const { userProfileData } = useAppSelector((state) => state.getUserProfile);
   const { userPlaylistsData } = useAppSelector(
@@ -32,6 +47,19 @@ const UserPage: React.FC = () => {
   );
   const { userTopArtists } = useAppSelector((state) => state.getUserTopArtists);
   const { userTopTracks } = useAppSelector((state) => state.getUserTopTracks);
+  const { isFollowingUserData } = useAppSelector(
+    (state) => state.isFollowingUser
+  );
+
+  const followUserHandler = () => {
+    dispatch(followUser(`${idParam.id}`));
+    setFollowIndicator(!followIndicator);
+  };
+
+  const unfollowUserHandler = () => {
+    dispatch(unfollowUser(`${idParam.id}`));
+    setFollowIndicator(!followIndicator);
+  };
 
   return (
     <>
@@ -94,22 +122,60 @@ const UserPage: React.FC = () => {
                       : null}
                   </Box>
                   <Box>
-                    {userProfileData?.followers.total > 1
-                      ? (
-                          <>
-                            &nbsp; &#8226;{" "}
-                            {userProfileData?.followers.total.toLocaleString()}{" "}
-                          </>
-                        ) + " Followers"
-                      : userProfileData?.followers.total === 1
-                      ? "1 Follower"
-                      : null}
+                    {userProfileData?.followers.total > 1 ? (
+                      <>
+                        &nbsp; &#8226;{" "}
+                        {userProfileData?.followers.total.toLocaleString()}
+                        {" Followers"}
+                      </>
+                    ) : userProfileData?.followers.total === 1 ? (
+                      "1 Follower"
+                    ) : null}
                   </Box>
                 </GridItem>
+                {userProfileData?.id != localStorage.getItem("userId") ? (
+                  isFollowingUserData ? (
+                    isFollowingUserData[0] === false ? (
+                      <GridItem>
+                        <Box>
+                          <Button
+                            marginLeft={"3.5vw"}
+                            colorScheme="white"
+                            variant="outline"
+                            fontSize={"13px"}
+                            height="30px"
+                            borderColor={"gray"}
+                            color="white"
+                            onClick={() => followUserHandler()}
+                          >
+                            FOLLOW
+                          </Button>
+                        </Box>
+                      </GridItem>
+                    ) : (
+                      <GridItem>
+                        <Box>
+                          <Button
+                            marginLeft={"3.5vw"}
+                            colorScheme="white"
+                            variant="outline"
+                            fontSize={"13px"}
+                            height="30px"
+                            borderColor={"gray"}
+                            color="white"
+                            onClick={() => unfollowUserHandler()}
+                          >
+                            FOLLOWING
+                          </Button>
+                        </Box>
+                      </GridItem>
+                    )
+                  ) : null
+                ) : null}
               </Grid>
               {idParam.id === localStorage.getItem("userId") ? (
                 <>
-                  {userTopArtists.total > 0 ? (
+                  {userTopArtists?.total > 0 ? (
                     <HomePageGrid
                       GridHeader="Top Played Artists"
                       GridData={userTopArtists}
@@ -121,7 +187,7 @@ const UserPage: React.FC = () => {
                       No top played artists yet
                     </Heading>
                   )}
-                  {userTopTracks.total > 0 ? (
+                  {userTopTracks?.total > 0 ? (
                     <HomePageGrid
                       GridHeader="Top Played Tracks"
                       GridData={userTopTracks}
@@ -135,7 +201,7 @@ const UserPage: React.FC = () => {
                   )}
                 </>
               ) : null}
-              {userPlaylistsData.total > 0 ? (
+              {userPlaylistsData?.total > 0 ? (
                 <HomePageGrid
                   GridHeader="Public Playlists"
                   //@ts-ignore

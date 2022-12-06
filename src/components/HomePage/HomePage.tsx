@@ -8,10 +8,8 @@ import { getNewReleases } from "../../features/releases/newReleasesSlice";
 import HomePageGrid from "../HomePageGrid/HomePageGrid";
 import NoImage from "../../assets/NoImage.png";
 
-// TODO: CREATE A README.MD
 // TODO: UPLOAD IMAGE WHILE EDITING PLAYLIST
 // TODO: MUSIC PLAYER
-// TODO: FOLLOW & UNFOLLOW ARTIST/USER/PLAYLIST/ALBUM (DEBUG WHY IT GIVES 401 ERROR)
 // TODO: CREATE PLAYLIST, ADD AND REMOVE SONGS FROM PLAYLIST (CHECK API DOCS)
 
 // CURRENT WEBSITE FEATURES:

@@ -100,8 +100,8 @@
 ### 📋 To Do
 
 - [x] ~~Create a README file.~~
+- [x] ~~Follow & Unfollow (artist/user/playlist/album).~~
 - [ ] Change the user's previously created playlist image.
 - [ ] Add music player.
-- [ ] Follow & Unfollow (artist/user/playlist/album).
 - [ ] Create a playlist.
 - [ ] Add & Remove songs from a created playlist.

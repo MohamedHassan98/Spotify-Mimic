@@ -1,4 +1,5 @@
 import { BiTime } from "react-icons/bi";
+import { BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
@@ -32,10 +33,13 @@ import {
 } from "@chakra-ui/react";
 import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
 import { getPlaylistData } from "../../features/playlist/getPlaylistSlice";
-import { editUserPlaylistData } from "../../features/playlist/editUserPlaylistSlice";
+import { editUserPlaylistData } from "../../features/playlist/editUserPlaylist";
 import { getAlbumDetails } from "../../features/album/getAlbumDetailsSlice";
 import { getArtistAlbums } from "../../features/album/getArtistAlbumsSlice";
 import { getLikedSongsPlaylist } from "../../features/playlists/likedSongsPlaylistSlice";
+import { isFollowingPlaylist } from "../../features/playlist/isFollowingPlaylistSlice";
+import { followPlaylist } from "../../features/playlist/followPlaylist";
+import { unfollowPlaylist } from "../../features/playlist/unfollowPlaylist";
 import SidebarWithHeader from "../Nav/Nav";
 import HomePageGrid from "../HomePageGrid/HomePageGrid";
 import LikedSongsDefault from "../../assets/LikedSongs.png";
@@ -59,6 +63,16 @@ const SongsPage: React.FC = () => {
   };
   const handleDescriptionChange = (event: { target: { value: string } }) => {
     setDescriptionValue(event.target.value);
+  };
+
+  const followPlaylistHandler = () => {
+    dispatch(followPlaylist(`${idParam.id}`));
+    setUpdateIndicator(!updateIndicator);
+  };
+
+  const unfollowPlaylistHandler = () => {
+    dispatch(unfollowPlaylist(`${idParam.id}`));
+    setUpdateIndicator(!updateIndicator);
   };
 
   const handleOwnerClick = (id: string) => {
@@ -87,6 +101,9 @@ const SongsPage: React.FC = () => {
   );
   const { albumDetails } = useAppSelector((state) => state.getAlbumDetails);
   const { albumsData } = useAppSelector((state) => state.getArtistAlbums);
+  const { isFollowingPlaylistData } = useAppSelector(
+    (state) => state.isFollowingPlaylist
+  );
   const { likedSongsPlaylist } = useAppSelector(
     (state) => state.getLikedSongsPlaylist
   );
@@ -134,6 +151,7 @@ const SongsPage: React.FC = () => {
       setLikedSongsIndicator(false);
       setPlaylistIndicator(true);
       fetchPlaylists();
+      dispatch(isFollowingPlaylist(`${idParam.id}`));
     }
     if (location.pathname.slice(0, 6) === "/album") {
       setPlaylistIndicator(false);
@@ -332,6 +350,8 @@ const SongsPage: React.FC = () => {
                 <GridItem
                   fontSize="14px"
                   display="flex"
+                  flexWrap={"wrap"}
+                  rowGap="30px"
                   color="white"
                   rowSpan={1}
                   colSpan={1}
@@ -393,6 +413,26 @@ const SongsPage: React.FC = () => {
                         : likedSongsPlaylist?.total + " song"
                       : null}
                   </Box>
+                  {isFollowingPlaylistData &&
+                  playlistData?.owner.id !== localStorage.getItem("userId") ? (
+                    isFollowingPlaylistData[0] === false ? (
+                      <Box
+                        marginLeft={"1vw"}
+                        _hover={{ cursor: "pointer" }}
+                        onClick={() => followPlaylistHandler()}
+                      >
+                        <BsSuitHeart size="20px" />
+                      </Box>
+                    ) : (
+                      <Box
+                        marginLeft={"1vw"}
+                        _hover={{ cursor: "pointer" }}
+                        onClick={() => unfollowPlaylistHandler()}
+                      >
+                        <BsSuitHeartFill size="20px" />
+                      </Box>
+                    )
+                  ) : null}
                 </GridItem>
               </Grid>
               <TableContainer>

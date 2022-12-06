@@ -19,6 +19,9 @@ import createPlaylist from "./playlist/createPlaylistSlice";
 import getSearchResults from "./search/getSearchResultsSlice";
 import getUserTopArtists from "./users/userTopArtistsSlice";
 import getUserTopTracks from "./users/userTopTracksSlice";
+import isFollowingArtist from "./artist/isFollowingArtistSlice";
+import isFollowingUser from "./users/isFollowingUserSlice";
+import isFollowingPlaylist from "./playlist/isFollowingPlaylistSlice";
 
 const store = configureStore({
   reducer: {
@@ -40,7 +43,10 @@ const store = configureStore({
     createPlaylist,
     getSearchResults,
     getUserTopArtists,
-    getUserTopTracks
+    getUserTopTracks,
+    isFollowingArtist,
+    isFollowingUser,
+    isFollowingPlaylist
   },
 });
 

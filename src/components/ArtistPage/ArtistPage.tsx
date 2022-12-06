@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { GoVerified } from "react-icons/go";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -14,12 +14,16 @@ import {
   Td,
   Image,
   Tr,
+  Button,
 } from "@chakra-ui/react";
 import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
 import { getArtist } from "../../features/artist/getArtistSlice";
 import { getTopTracks } from "../../features/artist/getTopTracksSlice";
 import { getRelatedArtists } from "../../features/artist/getRelatedArtistsSlice";
 import { getArtistAlbums } from "../../features/album/getArtistAlbumsSlice";
+import { followArtist } from "../../features/artist/followArtist";
+import { isFollowingArtist } from "../../features/artist/isFollowingArtistSlice";
+import { unfollowArtist } from "../../features/artist/unfollowArtist";
 import SidebarWithHeader from "../Nav/Nav";
 import NoImage from "../../assets/NoImage.png";
 
@@ -27,6 +31,11 @@ const ArtistPage: React.FC = () => {
   const idParam = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
+  const [followIndicator, setFollowIndicator] = useState(false);
+
+  const { isFollowingArtistData } = useAppSelector(
+    (state) => state.isFollowingArtist
+  );
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -34,7 +43,18 @@ const ArtistPage: React.FC = () => {
     dispatch(getTopTracks(`${idParam.id}`));
     dispatch(getRelatedArtists(`${idParam.id}`));
     dispatch(getArtistAlbums({ artistId: idParam.id, limitNumber: 7 }));
-  }, [idParam.id]);
+    dispatch(isFollowingArtist(`${idParam.id}`));
+  }, [idParam.id, followIndicator]);
+
+  const followArtistHandler = () => {
+    dispatch(followArtist(`${idParam.id}`));
+    setFollowIndicator(!followIndicator);
+  };
+
+  const unfollowArtistHandler = () => {
+    dispatch(unfollowArtist(`${idParam.id}`));
+    setFollowIndicator(!followIndicator);
+  };
 
   const { artistData } = useAppSelector((state) => state.getArtist);
   const { topTracksData } = useAppSelector((state) => state.getTopTracks);
@@ -87,6 +107,33 @@ const ArtistPage: React.FC = () => {
               </GridItem>
               <GridItem color="white" fontSize={"16px"} fontWeight="medium">
                 {artistData?.followers.total.toLocaleString()} Followers
+                {isFollowingArtistData ? (
+                  isFollowingArtistData[0] === false ? (
+                    <Button
+                      marginLeft={"10px"}
+                      colorScheme="white"
+                      variant="outline"
+                      fontSize={"13px"}
+                      height="30px"
+                      borderColor={"gray"}
+                      onClick={() => followArtistHandler()}
+                    >
+                      FOLLOW
+                    </Button>
+                  ) : (
+                    <Button
+                      marginLeft={"10px"}
+                      colorScheme="white"
+                      variant="outline"
+                      fontSize={"13px"}
+                      height="30px"
+                      borderColor={"gray"}
+                      onClick={() => unfollowArtistHandler()}
+                    >
+                      FOLLOWING
+                    </Button>
+                  )
+                ) : null}
               </GridItem>
             </Grid>
             <Heading color="white" size="md" paddingTop={"20px"}>

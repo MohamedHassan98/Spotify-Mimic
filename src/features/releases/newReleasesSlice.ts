@@ -5,7 +5,7 @@ import axios from "axios";
 export const getNewReleases = createAsyncThunk(
   "releases/getNewReleases",
   async (limitNumber: number, thunkApi) => {
-    const NEW_RELEASES_ENDPOINT = `https://api.spotify.com/v1/browse/new-releases?limit=${limitNumber}&country=US`;
+    const NEW_RELEASES_ENDPOINT = `https://api.spotify.com/v1/browse/new-releases?limit=${limitNumber}&country=EG`;
     try {
       const response = await axios
       .get(NEW_RELEASES_ENDPOINT, {
