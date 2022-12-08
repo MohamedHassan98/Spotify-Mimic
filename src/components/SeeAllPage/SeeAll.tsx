@@ -8,7 +8,7 @@ import { getArtistAlbums } from "../../features/album/getArtistAlbumsSlice";
 import { getbrowseCategories } from "../../features/categories/browseCategoriesSlice";
 import { getCategoryPlaylists } from "../../features/playlists/categoryPlaylistsSlice";
 import SidebarWithHeader from "../Nav/Nav";
-import HomePageGrid from "../HomePageGrid/HomePageGrid";
+import Gridder from "../Gridder/Gridder";
 
 const UserPage: React.FC = () => {
   const location = useLocation();
@@ -45,7 +45,7 @@ const UserPage: React.FC = () => {
   const JSXHandler = () => {
     if (locationArray[0] === "featured-playlists") {
       return (
-        <HomePageGrid
+        <Gridder
           GridHeader="Featured playlists"
           //@ts-ignore
           GridData={featuredPlaylistsData?.playlists}
@@ -57,7 +57,7 @@ const UserPage: React.FC = () => {
 
     if (locationArray[0] === "new-releases") {
       return (
-        <HomePageGrid
+        <Gridder
           GridHeader="New releases"
           //@ts-ignore
           GridData={newReleasesData?.albums}
@@ -69,7 +69,7 @@ const UserPage: React.FC = () => {
 
     if (locationArray[0] === "albums") {
       return (
-        <HomePageGrid
+        <Gridder
           GridHeader="Albums"
           //@ts-ignore
           GridData={albumsData}
@@ -81,7 +81,7 @@ const UserPage: React.FC = () => {
 
     if (locationArray[0] === "categories") {
       return (
-        <HomePageGrid
+        <Gridder
           GridHeader="Browse categories"
           //@ts-ignore
           GridData={browserCategoriesData?.categories}
@@ -93,7 +93,7 @@ const UserPage: React.FC = () => {
 
     if (locationArray[0] === "category") {
       return (
-        <HomePageGrid
+        <Gridder
           GridHeader="Category playlists"
           //@ts-ignore
           GridData={categoryPlaylistsData?.playlists}

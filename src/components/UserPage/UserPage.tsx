@@ -9,6 +9,7 @@ import {
 } from "@chakra-ui/react";
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import ReactPaginate from "react-paginate";
 import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
 import { getUserProfile } from "../../features/users/userProfileSlice";
 import { getUserPlaylists } from "../../features/playlists/userPlaylistsSlice";
@@ -18,13 +19,14 @@ import { isFollowingUser } from "../../features/users/isFollowingUserSlice";
 import { followUser } from "../../features/users/followUser";
 import { unfollowUser } from "../../features/users/unfollowUser";
 import SidebarWithHeader from "../Nav/Nav";
-import HomePageGrid from "../HomePageGrid/HomePageGrid";
+import Gridder from "../Gridder/Gridder";
 import UserProfileDefault from "../../assets/UserProfileDefault.png";
 
 const UserPage: React.FC = () => {
   const idParam = useParams();
   const dispatch = useAppDispatch();
   const [followIndicator, setFollowIndicator] = useState(false);
+  const [itemOffset, setItemOffset] = useState(0);
 
   useEffect(() => {
     let userId = idParam?.id;
@@ -59,6 +61,21 @@ const UserPage: React.FC = () => {
   const unfollowUserHandler = () => {
     dispatch(unfollowUser(`${idParam.id}`));
     setFollowIndicator(!followIndicator);
+  };
+
+  const handlePageClick = (event: { selected: number }) => {
+    const newOffset = userPlaylistsData
+      ? (event.selected * 50) % userPlaylistsData?.total
+      : 0;
+    setItemOffset(newOffset);
+    dispatch(
+      getUserPlaylists({
+        user_id: idParam.id ? idParam.id : "",
+        limitNumber: 50,
+        offsetNumber: newOffset,
+      })
+    );
+    window.scrollTo(0, 0);
   };
 
   return (
@@ -175,9 +192,10 @@ const UserPage: React.FC = () => {
               </Grid>
               {idParam.id === localStorage.getItem("userId") ? (
                 <>
-                  {userTopArtists?.total > 0 ? (
-                    <HomePageGrid
+                  {userTopArtists && userTopArtists?.total > 0 ? (
+                    <Gridder
                       GridHeader="Top Played Artists"
+                      //@ts-ignore
                       GridData={userTopArtists}
                       GridSeeAll={false}
                       GridType="artists"
@@ -187,9 +205,10 @@ const UserPage: React.FC = () => {
                       No top played artists yet
                     </Heading>
                   )}
-                  {userTopTracks?.total > 0 ? (
-                    <HomePageGrid
+                  {userTopTracks && userTopTracks?.total > 0 ? (
+                    <Gridder
                       GridHeader="Top Played Tracks"
+                      //@ts-ignore
                       GridData={userTopTracks}
                       GridSeeAll={false}
                       GridType="tracks"
@@ -202,13 +221,34 @@ const UserPage: React.FC = () => {
                 </>
               ) : null}
               {userPlaylistsData?.total > 0 ? (
-                <HomePageGrid
-                  GridHeader="Public Playlists"
-                  //@ts-ignore
-                  GridData={userPlaylistsData}
-                  GridSeeAll={false}
-                  GridType="playlist"
-                />
+                <>
+                  <Gridder
+                    GridHeader="Public Playlists"
+                    //@ts-ignore
+                    GridData={userPlaylistsData}
+                    GridSeeAll={false}
+                    GridType="playlist"
+                  />
+                  {userPlaylistsData && userPlaylistsData?.total > 50 ? (
+                    <ReactPaginate
+                      breakLabel="..."
+                      nextLabel="Next"
+                      onPageChange={handlePageClick}
+                      pageRangeDisplayed={5}
+                      pageCount={
+                        userPlaylistsData &&
+                        Math.ceil(userPlaylistsData?.total / 50)
+                      }
+                      previousLabel="Previous"
+                      renderOnZeroPageCount={undefined}
+                      containerClassName={"pagination"}
+                      previousLinkClassName={"pagination__link"}
+                      nextLinkClassName={"pagination__link"}
+                      disabledClassName={"pagination__link--disabled"}
+                      activeClassName={"pagination__link--active"}
+                    />
+                  ) : null}
+                </>
               ) : (
                 <Heading color="white" as="h2" size="sm">
                   No public playlists yet

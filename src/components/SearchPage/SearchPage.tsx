@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
 import { getSearchResults } from "../../features/search/getSearchResultsSlice";
-import HomePageGrid from "../HomePageGrid/HomePageGrid";
+import Gridder from "../Gridder/Gridder";
 import SidebarWithHeader from "../Nav/Nav";
 
 const SearchPage: React.FC = () => {
@@ -122,7 +122,7 @@ const SearchPage: React.FC = () => {
             </InputGroup>
             <Box>
               {searchIndicator ? (
-                <HomePageGrid
+                <Gridder
                   GridType={searchType}
                   GridHeader="Search Results"
                   GridSeeAll={false}

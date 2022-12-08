@@ -1,5 +1,6 @@
-import { BiTime } from "react-icons/bi";
+import { BiTime, BiDotsHorizontalRounded } from "react-icons/bi";
 import { BsSuitHeart, BsSuitHeartFill } from "react-icons/bs";
+import ReactPaginate from "react-paginate";
 import { useNavigate, useParams, useLocation } from "react-router-dom";
 import { useEffect, useState } from "react";
 import {
@@ -30,6 +31,10 @@ import {
   ModalBody,
   ModalCloseButton,
   CheckboxGroup,
+  Menu,
+  MenuButton,
+  MenuList,
+  MenuItem,
 } from "@chakra-ui/react";
 import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
 import { getPlaylistData } from "../../features/playlist/getPlaylistSlice";
@@ -40,13 +45,19 @@ import { getLikedSongsPlaylist } from "../../features/playlists/likedSongsPlayli
 import { isFollowingPlaylist } from "../../features/playlist/isFollowingPlaylistSlice";
 import { followPlaylist } from "../../features/playlist/followPlaylist";
 import { unfollowPlaylist } from "../../features/playlist/unfollowPlaylist";
+import { getPlaylistTracksData } from "../../features/playlist/getPlaylistTracksSlice";
+import { getUserOwnedPlaylists } from "../../features/playlists/userOwnedPlaylistsSlice";
+import { addSongToPlaylist } from "../../features/playlist/addSongToPlaylist";
+import { removeSongFromPlaylist } from "../../features/playlist/removeSongFromPlaylist";
 import SidebarWithHeader from "../Nav/Nav";
-import HomePageGrid from "../HomePageGrid/HomePageGrid";
+import Gridder from "../Gridder/Gridder";
 import LikedSongsDefault from "../../assets/LikedSongs.png";
+import NoImage from "../../assets/NoImage.png";
 
 const SongsPage: React.FC = () => {
   const [updateIndicator, setUpdateIndicator] = useState(false);
   const [playlistIndicator, setPlaylistIndicator] = useState(false);
+  const [itemOffset, setItemOffset] = useState(0);
   const [albumIndicator, setAlbumIndicator] = useState(false);
   const [likedSongsIndicator, setLikedSongsIndicator] = useState(false);
   const [collaborativeBool, setCollaborativeBool] = useState(false);
@@ -87,6 +98,47 @@ const SongsPage: React.FC = () => {
     }
   };
 
+  const handlePageClick = (event: { selected: number }) => {
+    if (playlistIndicator) {
+      const newOffset = playlistTracksData
+        ? (event.selected * 100) % playlistTracksData?.total
+        : 0;
+      setItemOffset(newOffset);
+      dispatch(
+        getPlaylistTracksData({
+          playlist_id: idParam.id ? idParam.id : "",
+          playlistOffset: newOffset,
+        })
+      );
+    }
+    if (likedSongsIndicator) {
+      const newOffset = likedSongsPlaylist
+        ? (event.selected * 100) % likedSongsPlaylist?.total
+        : 0;
+      setItemOffset(newOffset);
+      dispatch(getLikedSongsPlaylist(newOffset));
+    }
+    window.scrollTo(0, 0);
+  };
+
+  const handleAddSongToPlaylist = (playlistId: string, songURI: string) => {
+    dispatch(addSongToPlaylist({ playlistId, songURI }));
+  };
+
+  async function handleRemoveSongFromPlaylist(
+    playlistId: string,
+    songURI: string
+  ) {
+    await dispatch(removeSongFromPlaylist({ playlistId, songURI }));
+    dispatch(
+      getPlaylistTracksData({
+        playlist_id: idParam.id ? idParam.id : "",
+        playlistOffset: 0,
+      })
+    );
+    dispatch(getPlaylistData(idParam?.id));
+  }
+
   const convertMinutes = (millis: number) => {
     let minutes: number = Math.floor(millis / 60000);
     //@ts-ignore
@@ -106,6 +158,13 @@ const SongsPage: React.FC = () => {
   );
   const { likedSongsPlaylist } = useAppSelector(
     (state) => state.getLikedSongsPlaylist
+  );
+  const { playlistTracksData } = useAppSelector(
+    (state) => state.getPlaylistTracksData
+  );
+
+  const { userOwnedPlaylistsData } = useAppSelector(
+    (state) => state.getUserOwnedPlaylists
   );
 
   const handleSubmitChanges = () => {
@@ -152,6 +211,12 @@ const SongsPage: React.FC = () => {
       setPlaylistIndicator(true);
       fetchPlaylists();
       dispatch(isFollowingPlaylist(`${idParam.id}`));
+      dispatch(
+        getPlaylistTracksData({
+          playlist_id: idParam.id ? idParam.id : "",
+          playlistOffset: 0,
+        })
+      );
     }
     if (location.pathname.slice(0, 6) === "/album") {
       setPlaylistIndicator(false);
@@ -163,9 +228,12 @@ const SongsPage: React.FC = () => {
       setPlaylistIndicator(false);
       setAlbumIndicator(false);
       setLikedSongsIndicator(true);
-      dispatch(getLikedSongsPlaylist());
+      dispatch(getLikedSongsPlaylist(0));
     }
-  }, [dispatch, idParam.id, updateIndicator]);
+    if (playlistData?.owner.id !== localStorage.getItem("userId")) {
+      dispatch(getUserOwnedPlaylists());
+    }
+  }, [idParam.id, updateIndicator]);
 
   return (
     <>
@@ -174,7 +242,6 @@ const SongsPage: React.FC = () => {
           playlistData || albumDetails || likedSongsPlaylist ? (
             <Stack marginLeft="10px" marginTop="80px" spacing={6}>
               <Grid
-                //bgImage={"linear-gradient(#218787, #145050)"}
                 bgImage={"linear-gradient(#09CCCC, #125858)"}
                 padding="30px"
                 borderRadius={"10px"}
@@ -184,6 +251,7 @@ const SongsPage: React.FC = () => {
                 templateColumns={{ base: "1fr", lg: "20% 1fr" }}
                 gap={4}
                 onClick={
+                  playlistIndicator &&
                   playlistData?.owner.id === currentUserProfileData?.id
                     ? onOpen
                     : undefined
@@ -275,13 +343,13 @@ const SongsPage: React.FC = () => {
                       borderRadius="10px"
                       boxShadow="0px 0px 20px black"
                       src={
-                        playlistIndicator
-                          ? playlistData?.images[0].url
-                          : albumIndicator
+                        playlistIndicator && playlistData?.images[0]
+                          ? playlistData.images[0].url
+                          : albumIndicator && albumDetails?.images[0]
                           ? albumDetails?.images[0].url
                           : likedSongsIndicator
                           ? LikedSongsDefault
-                          : ""
+                          : NoImage
                       }
                       alt={`${
                         playlistIndicator
@@ -362,13 +430,13 @@ const SongsPage: React.FC = () => {
                     _hover={{ cursor: "pointer" }}
                     onClick={() =>
                       handleOwnerClick(
-                        playlistIndicator
-                          ? playlistData?.owner.id
-                          : albumIndicator
+                        playlistIndicator && playlistData?.owner.id
+                          ? playlistData.owner.id
+                          : albumIndicator && albumDetails?.artists[0].id
                           ? albumDetails?.artists[0].id
-                          : likedSongsIndicator
-                          ? currentUserProfileData?.id
-                          : null
+                          : likedSongsIndicator && currentUserProfileData?.id
+                          ? currentUserProfileData.id
+                          : ""
                       )
                     }
                   >
@@ -399,21 +467,22 @@ const SongsPage: React.FC = () => {
                         " "
                       : null}
 
-                    {playlistIndicator && playlistData
-                      ? playlistData?.tracks.total > 1
-                        ? playlistData?.tracks.total + " songs"
-                        : playlistData?.tracks.total + " song"
+                    {playlistIndicator && playlistTracksData
+                      ? playlistTracksData?.total > 1
+                        ? playlistTracksData?.total.toLocaleString() + " songs"
+                        : playlistTracksData?.total + " song"
                       : albumIndicator && albumDetails
                       ? albumDetails?.total_tracks > 1
-                        ? albumDetails?.total_tracks + " songs"
+                        ? albumDetails?.total_tracks.toLocaleString() + " songs"
                         : albumDetails?.total_tracks + " song"
                       : likedSongsIndicator && likedSongsPlaylist
                       ? likedSongsPlaylist?.total > 1
-                        ? likedSongsPlaylist?.total + " songs"
+                        ? likedSongsPlaylist?.total.toLocaleString() + " songs"
                         : likedSongsPlaylist?.total + " song"
                       : null}
                   </Box>
                   {isFollowingPlaylistData &&
+                  playlistIndicator &&
                   playlistData?.owner.id !== localStorage.getItem("userId") ? (
                     isFollowingPlaylistData[0] === false ? (
                       <Box
@@ -435,196 +504,405 @@ const SongsPage: React.FC = () => {
                   ) : null}
                 </GridItem>
               </Grid>
-              <TableContainer>
-                <Table
-                  backgroundImage="linear-gradient(#303231, black)"
-                  color="white"
-                  variant="unstyled"
-                >
-                  <Thead color="gray">
-                    {playlistIndicator || likedSongsIndicator ? (
-                      <Tr>
-                        <Th>#</Th>
-                        <Th>TITLE</Th>
-                        <Th>ALBUM</Th>
-                        <Th>DATE ADDED</Th>
-                        <Th>
-                          <IconButton
-                            bgColor={"transparent"}
-                            _hover={{ cursor: "pointer" }}
-                            icon={<BiTime />}
-                            aria-label={"Song duration icon"}
-                          />
-                        </Th>
-                      </Tr>
-                    ) : (
-                      <Tr>
-                        <Th>#</Th>
-                        <Th>TITLE</Th>
-                        <Th>
-                          <IconButton
-                            bgColor={"transparent"}
-                            _hover={{ cursor: "pointer" }}
-                            icon={<BiTime />}
-                            aria-label={"Song duration icon"}
-                          />
-                        </Th>
-                      </Tr>
-                    )}
-                  </Thead>
-                  <Tbody>
-                    {playlistIndicator
-                      ? playlistData?.tracks.items.map((item, id: number) => (
-                          <Tr
-                            key={id}
-                            color="gray"
-                            _hover={{ color: "white", bgColor: "#145050" }}
-                          >
-                            <Td>{id + 1}</Td>
-                            <Td>
-                              <Box
-                                color="white"
-                                width="-webkit-fit-content"
-                                _hover={{
-                                  textDecoration: "underline",
-                                  cursor: "pointer",
-                                }}
-                              >
-                                {item.track.name}
-                              </Box>
-                              <Box>
-                                {item.track.artists.map(
-                                  (
-                                    artist: { id: string; name: string },
-                                    idx: number,
-                                    arr: []
-                                  ) => (
-                                    <span
-                                      key={artist.id}
-                                      style={{ cursor: "pointer" }}
-                                      onClick={() =>
-                                        navigate(`/artist/${artist.id}`)
-                                      }
-                                    >
-                                      {arr.length - 1 === idx
-                                        ? artist.name
-                                        : artist.name + ", "}
-                                    </span>
-                                  )
-                                )}
-                              </Box>
-                            </Td>
-                            <Td>
-                              <Box
-                                width="-webkit-fit-content"
-                                _hover={{
-                                  textDecoration: "underline",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  navigate(`/album/${item.track.album.id}`)
-                                }
-                              >
-                                {item.track.album.name}
-                              </Box>
-                            </Td>
-                            <Td color="gray">
-                              {item.added_at.substring(0, 10) === "1970-01-01"
-                                ? "N/A"
-                                : item.added_at.substring(0, 10)}
-                            </Td>
-                            <Td color="gray">
-                              {convertMinutes(item.track.duration_ms)}
-                            </Td>
-                          </Tr>
-                        ))
-                      : null}
-                    {likedSongsIndicator
-                      ? likedSongsPlaylist?.items.map((item, id: number) => (
-                          <Tr
-                            key={id}
-                            color="gray"
-                            _hover={{ color: "white", bgColor: "#145050" }}
-                          >
-                            <Td>{id + 1}</Td>
-                            <Td>
-                              <Box
-                                color="white"
-                                width="-webkit-fit-content"
-                                _hover={{
-                                  textDecoration: "underline",
-                                  cursor: "pointer",
-                                }}
-                              >
-                                {item.track.name}
-                              </Box>
-                              <Box>
-                                {item.track.artists.map(
-                                  (
-                                    artist: { name: string; id: string },
-                                    idx: number,
-                                    arr: []
-                                  ) => (
-                                    <span
-                                      key={artist.id}
-                                      style={{ cursor: "pointer" }}
-                                      onClick={() =>
-                                        navigate(`/artist/${artist.id}`)
-                                      }
-                                    >
-                                      {arr.length - 1 === idx
-                                        ? artist.name
-                                        : artist.name + ", "}
-                                    </span>
-                                  )
-                                )}
-                              </Box>
-                            </Td>
-                            <Td>
-                              <Box
-                                width="-webkit-fit-content"
-                                _hover={{
-                                  textDecoration: "underline",
-                                  cursor: "pointer",
-                                }}
-                                onClick={() =>
-                                  navigate(`/album/${item.track.album.id}`)
-                                }
-                              >
-                                {item.track.album.name}
-                              </Box>
-                            </Td>
-                            <Td color="gray">
-                              {item.added_at.substring(0, 10) === "1970-01-01"
-                                ? "N/A"
-                                : item.added_at.substring(0, 10)}
-                            </Td>
-                            <Td color="gray">
-                              {convertMinutes(item.track.duration_ms)}
-                            </Td>
-                          </Tr>
-                        ))
-                      : null}
-                    {albumIndicator
-                      ? albumDetails?.tracks.items.map((item, id: number) => (
-                          <Tr
-                            key={id}
-                            color="gray"
-                            _hover={{ color: "white", bgColor: "#145050" }}
-                          >
-                            <Td>{id + 1}</Td>
-                            <Td>
-                              <Box color="white">{item.name}</Box>
-                            </Td>
-                            <Td color="gray">
-                              {convertMinutes(item.duration_ms)}
-                            </Td>
-                          </Tr>
-                        ))
-                      : null}
-                  </Tbody>
-                </Table>
-              </TableContainer>
+              {(playlistTracksData && playlistTracksData?.total > 0) ||
+              (likedSongsPlaylist && likedSongsPlaylist?.total > 0) ||
+              (albumDetails && albumDetails?.total_tracks > 0) ? (
+                <TableContainer zIndex={1}>
+                  <Table
+                    backgroundImage="linear-gradient(#303231, black)"
+                    color="white"
+                    variant="unstyled"
+                  >
+                    <Thead color="gray">
+                      {playlistIndicator || likedSongsIndicator ? (
+                        <Tr>
+                          <Th>#</Th>
+                          <Th>TITLE</Th>
+                          <Th>ALBUM</Th>
+                          <Th>DATE ADDED</Th>
+                          <Th>
+                            <IconButton
+                              bgColor={"transparent"}
+                              _hover={{ cursor: "pointer" }}
+                              icon={<BiTime />}
+                              aria-label={"Song duration icon"}
+                            />
+                          </Th>
+                          <Th>
+                            {likedSongsIndicator ||
+                            playlistData?.owner.id !==
+                              localStorage.getItem("userId")
+                              ? "Add to playlist"
+                              : "Remove from playlist"}
+                          </Th>
+                        </Tr>
+                      ) : (
+                        <Tr>
+                          <Th>#</Th>
+                          <Th>TITLE</Th>
+                          <Th>
+                            <IconButton
+                              bgColor={"transparent"}
+                              _hover={{ cursor: "pointer" }}
+                              icon={<BiTime />}
+                              aria-label={"Song duration icon"}
+                            />
+                          </Th>
+                          <Th>Add to playlist</Th>
+                        </Tr>
+                      )}
+                    </Thead>
+                    <Tbody>
+                      {playlistIndicator
+                        ? playlistTracksData?.items.map((item, id: number) => (
+                            <Tr
+                              key={id}
+                              color="gray"
+                              _hover={{ color: "white", bgColor: "#145050" }}
+                            >
+                              <Td>{id + 1}</Td>
+                              <Td>
+                                <Box
+                                  color="white"
+                                  width="-webkit-fit-content"
+                                  _hover={{
+                                    textDecoration: "underline",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  {item.track.name}
+                                </Box>
+                                <Box>
+                                  {item.track.artists.map(
+                                    (
+                                      artist: { id: string; name: string },
+                                      idx: number,
+                                      arr: []
+                                    ) => (
+                                      <span
+                                        key={artist.id}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() =>
+                                          navigate(`/artist/${artist.id}`)
+                                        }
+                                      >
+                                        {arr.length - 1 === idx
+                                          ? artist.name
+                                          : artist.name + ", "}
+                                      </span>
+                                    )
+                                  )}
+                                </Box>
+                              </Td>
+                              <Td>
+                                <Box
+                                  width="-webkit-fit-content"
+                                  _hover={{
+                                    textDecoration: "underline",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    navigate(`/album/${item.track.album.id}`)
+                                  }
+                                >
+                                  {item.track.album.name}
+                                </Box>
+                              </Td>
+                              <Td color="gray">
+                                {item.added_at.substring(0, 10) === "1970-01-01"
+                                  ? "N/A"
+                                  : item.added_at.substring(0, 10)}
+                              </Td>
+                              <Td color="gray">
+                                {convertMinutes(item.track.duration_ms)}
+                              </Td>
+                              <Td>
+                                <Menu>
+                                  <MenuButton
+                                    aria-label="Owned playlist menu button"
+                                    as={Button}
+                                    bgColor="transparent"
+                                    color="white"
+                                    _hover={{ bgColor: "transparent" }}
+                                    _active={{ bgColor: "transparent" }}
+                                    rightIcon={<BiDotsHorizontalRounded />}
+                                  />
+                                  {playlistData?.owner.id !==
+                                  localStorage.getItem("userId") ? (
+                                    <MenuList color={"white"} bgColor="black">
+                                      {userOwnedPlaylistsData &&
+                                        userOwnedPlaylistsData?.map(
+                                          (playlist) => (
+                                            <MenuItem
+                                              key={playlist.id}
+                                              onClick={() =>
+                                                handleAddSongToPlaylist(
+                                                  playlist.id,
+                                                  item.track.uri
+                                                )
+                                              }
+                                              _hover={{
+                                                color: "black",
+                                                bgColor: "white",
+                                              }}
+                                              _active={{
+                                                bgColor: "black",
+                                                color: "white",
+                                              }}
+                                              _focus={{
+                                                bgColor: "black",
+                                                color: "white",
+                                              }}
+                                            >
+                                              {playlist.name}
+                                            </MenuItem>
+                                          )
+                                        )}
+                                    </MenuList>
+                                  ) : (
+                                    <MenuList color={"white"} bgColor="black">
+                                      <MenuItem
+                                        onClick={() =>
+                                          handleRemoveSongFromPlaylist(
+                                            idParam?.id ? idParam.id : "",
+                                            item.track.uri
+                                          )
+                                        }
+                                        _hover={{
+                                          color: "black",
+                                          bgColor: "white",
+                                        }}
+                                        _active={{
+                                          bgColor: "black",
+                                          color: "white",
+                                        }}
+                                        _focus={{
+                                          bgColor: "black",
+                                          color: "white",
+                                        }}
+                                      >
+                                        Remove from playlist
+                                      </MenuItem>
+                                    </MenuList>
+                                  )}
+                                </Menu>
+                              </Td>
+                            </Tr>
+                          ))
+                        : null}
+                      {likedSongsIndicator
+                        ? likedSongsPlaylist?.items.map((item, id: number) => (
+                            <Tr
+                              key={id}
+                              color="gray"
+                              _hover={{ color: "white", bgColor: "#145050" }}
+                            >
+                              <Td>{id + 1}</Td>
+                              <Td>
+                                <Box
+                                  color="white"
+                                  width="-webkit-fit-content"
+                                  _hover={{
+                                    textDecoration: "underline",
+                                    cursor: "pointer",
+                                  }}
+                                >
+                                  {item.track.name}
+                                </Box>
+                                <Box>
+                                  {item.track.artists.map(
+                                    (
+                                      artist: { name: string; id: string },
+                                      idx: number,
+                                      arr: []
+                                    ) => (
+                                      <span
+                                        key={artist.id}
+                                        style={{ cursor: "pointer" }}
+                                        onClick={() =>
+                                          navigate(`/artist/${artist.id}`)
+                                        }
+                                      >
+                                        {arr.length - 1 === idx
+                                          ? artist.name
+                                          : artist.name + ", "}
+                                      </span>
+                                    )
+                                  )}
+                                </Box>
+                              </Td>
+                              <Td>
+                                <Box
+                                  width="-webkit-fit-content"
+                                  _hover={{
+                                    textDecoration: "underline",
+                                    cursor: "pointer",
+                                  }}
+                                  onClick={() =>
+                                    navigate(`/album/${item.track.album.id}`)
+                                  }
+                                >
+                                  {item.track.album.name}
+                                </Box>
+                              </Td>
+                              <Td color="gray">
+                                {item.added_at.substring(0, 10) === "1970-01-01"
+                                  ? "N/A"
+                                  : item.added_at.substring(0, 10)}
+                              </Td>
+                              <Td color="gray">
+                                {convertMinutes(item.track.duration_ms)}
+                              </Td>
+                              <Td>
+                                <Menu>
+                                  <MenuButton
+                                    as={Button}
+                                    bgColor="transparent"
+                                    color="white"
+                                    _hover={{ bgColor: "transparent" }}
+                                    _active={{ bgColor: "transparent" }}
+                                    rightIcon={<BiDotsHorizontalRounded />}
+                                  />
+                                  <MenuList color={"white"} bgColor="black">
+                                    {userOwnedPlaylistsData &&
+                                      userOwnedPlaylistsData?.map(
+                                        (playlist) => (
+                                          <MenuItem
+                                            key={playlist.id}
+                                            onClick={() =>
+                                              handleAddSongToPlaylist(
+                                                playlist.id,
+                                                item.track.uri
+                                              )
+                                            }
+                                            _hover={{
+                                              color: "black",
+                                              bgColor: "white",
+                                            }}
+                                            _active={{
+                                              bgColor: "black",
+                                              color: "white",
+                                            }}
+                                            _focus={{
+                                              bgColor: "black",
+                                              color: "white",
+                                            }}
+                                          >
+                                            {playlist.name}
+                                          </MenuItem>
+                                        )
+                                      )}
+                                  </MenuList>
+                                </Menu>
+                              </Td>
+                            </Tr>
+                          ))
+                        : null}
+                      {albumIndicator
+                        ? albumDetails?.tracks.items.map((item, id: number) => (
+                            <Tr
+                              key={id}
+                              color="gray"
+                              _hover={{ color: "white", bgColor: "#145050" }}
+                            >
+                              <Td>{id + 1}</Td>
+                              <Td>
+                                <Box color="white">{item.name}</Box>
+                              </Td>
+                              <Td color="gray">
+                                {convertMinutes(item.duration_ms)}
+                              </Td>
+                              <Td>
+                                <Menu>
+                                  <MenuButton
+                                    as={Button}
+                                    bgColor="transparent"
+                                    color="white"
+                                    _hover={{ bgColor: "transparent" }}
+                                    _active={{ bgColor: "transparent" }}
+                                    rightIcon={<BiDotsHorizontalRounded />}
+                                  />
+                                  <MenuList color={"white"} bgColor="black">
+                                    {userOwnedPlaylistsData &&
+                                      userOwnedPlaylistsData?.map(
+                                        (playlist) => (
+                                          <MenuItem
+                                            key={playlist.id}
+                                            onClick={() =>
+                                              handleAddSongToPlaylist(
+                                                playlist.id,
+                                                item.uri
+                                              )
+                                            }
+                                            _hover={{
+                                              color: "black",
+                                              bgColor: "white",
+                                            }}
+                                            _active={{
+                                              bgColor: "black",
+                                              color: "white",
+                                            }}
+                                            _focus={{
+                                              bgColor: "black",
+                                              color: "white",
+                                            }}
+                                          >
+                                            {playlist.name}
+                                          </MenuItem>
+                                        )
+                                      )}
+                                  </MenuList>
+                                </Menu>
+                              </Td>
+                            </Tr>
+                          ))
+                        : null}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              ) : null}
+              {playlistIndicator &&
+              playlistTracksData &&
+              playlistTracksData?.total > 100 ? (
+                <ReactPaginate
+                  breakLabel="..."
+                  nextLabel="Next"
+                  onPageChange={handlePageClick}
+                  pageRangeDisplayed={5}
+                  pageCount={
+                    playlistTracksData &&
+                    Math.ceil(playlistTracksData?.total / 100)
+                  }
+                  previousLabel="Previous"
+                  renderOnZeroPageCount={undefined}
+                  containerClassName={"pagination"}
+                  previousLinkClassName={"pagination__link"}
+                  nextLinkClassName={"pagination__link"}
+                  disabledClassName={"pagination__link--disabled"}
+                  activeClassName={"pagination__link--active"}
+                />
+              ) : null}
+              {likedSongsIndicator &&
+              likedSongsPlaylist &&
+              likedSongsPlaylist?.total > 50 ? (
+                <ReactPaginate
+                  breakLabel="..."
+                  nextLabel="Next"
+                  onPageChange={handlePageClick}
+                  pageRangeDisplayed={5}
+                  pageCount={
+                    likedSongsPlaylist &&
+                    Math.ceil(likedSongsPlaylist?.total / 50)
+                  }
+                  previousLabel="Previous"
+                  renderOnZeroPageCount={undefined}
+                  containerClassName={"pagination"}
+                  previousLinkClassName={"pagination__link"}
+                  nextLinkClassName={"pagination__link"}
+                  disabledClassName={"pagination__link--disabled"}
+                  activeClassName={"pagination__link--active"}
+                />
+              ) : null}
               {albumIndicator && albumDetails?.label ? (
                 <span style={{ color: "darkgray", fontSize: "11px" }}>
                   &copy;
@@ -634,7 +912,7 @@ const SongsPage: React.FC = () => {
                 </span>
               ) : null}
               {albumIndicator ? (
-                <HomePageGrid
+                <Gridder
                   //@ts-ignore
                   GridData={albumsData}
                   GridHeader={"Albums"}

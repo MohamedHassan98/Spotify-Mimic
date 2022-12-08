@@ -101,7 +101,7 @@
 
 - [x] ~~Create a README file.~~
 - [x] ~~Follow & Unfollow (artist/user/playlist/album).~~
+- [x] ~~Create a playlist.~~
+- [x] ~~Add & Remove songs from a created playlist.~~
 - [ ] Change the user's previously created playlist image.
 - [ ] Add music player.
-- [ ] Create a playlist.
-- [ ] Add & Remove songs from a created playlist.

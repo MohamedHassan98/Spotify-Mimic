@@ -4,8 +4,8 @@ import axios from "axios";
 
 export const getLikedSongsPlaylist = createAsyncThunk(
   "playlists/likedSongsPlaylist",
-  async (_, thunkApi) => {
-    const LIKED_SONGS_PLAYLIST_ENDPOINT = `https://api.spotify.com/v1/me/tracks?limit=50`;
+  async (offsetNumber: number, thunkApi) => {
+    const LIKED_SONGS_PLAYLIST_ENDPOINT = `https://api.spotify.com/v1/me/tracks?limit=50&offset=${offsetNumber}`;
     try {
       const response = await axios
       .get(LIKED_SONGS_PLAYLIST_ENDPOINT, {
@@ -31,6 +31,7 @@ interface likedSongsPlaylistState {
       track: {
         artists: any;
         name: string;
+        uri: string;
         album: { name: string; id: string };
         duration_ms: number;
         };

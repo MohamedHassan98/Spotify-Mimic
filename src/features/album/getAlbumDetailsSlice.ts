@@ -27,13 +27,17 @@ interface getAlbumState {
   albumDetails: {
     name: string;
     album_type: string;
-    artists: any;
+    artists: {
+      id: string;
+      name: string;
+    }[];
     release_date: string;
     total_tracks: number;
     label: string;
     tracks: {
       items: {
         name: string;
+        uri: string;
         duration_ms: number;
       }[]
     };

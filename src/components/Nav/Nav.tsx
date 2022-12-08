@@ -47,8 +47,8 @@ interface LinkItemProps {
 const LinkItems: Array<LinkItemProps> = [
   { name: "Home", icon: FiHome, href: "/home", id: 1 },
   { name: "Search", icon: FiSearch, href: "/search", id: 2 },
-  { name: "Your Library", icon: IoLibrarySharp, href: "/home", id: 3 },
-  { name: "Create Playlist", icon: CgAddR, href: "javascript:void(0)", id: 4 },
+  { name: "Your Library", icon: IoLibrarySharp, href: "/your-library", id: 3 },
+  { name: "Create Playlist", icon: CgAddR, href: "/create-playlist", id: 4 },
   { name: "Liked Songs", icon: AiFillLike, href: "/liked-songs", id: 5 },
 ];
 
@@ -165,7 +165,11 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
             >
               PLAYLISTS
             </Heading>
-            <Center width="200px" margin="0 auto" marginTop="5px">
+            <Center
+              width={{ base: "93vw", md: "220px" }}
+              margin="0 auto"
+              marginTop="5px"
+            >
               <Divider orientation="horizontal" />
             </Center>
             {createdPlaylistsData?.items.map(
@@ -270,6 +274,7 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
       bg={useColorModeValue("black", "gray.900")}
       justifyContent={{ base: "space-between", md: "flex-end" }}
       {...rest}
+      zIndex={2}
     >
       <IconButton
         display={{ base: "flex", md: "none" }}
@@ -330,7 +335,11 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               color={"white"}
               borderColor={useColorModeValue("gray.200", "gray.700")}
             >
-              <MenuItem _hover={{ color: "black" }}>
+              <MenuItem
+                _hover={{ color: "black" }}
+                _active={{ bgColor: "white", color: "black" }}
+                _focus={{ bgColor: "white", color: "black" }}
+              >
                 <a
                   href="https://www.spotify.com/eg-en/account/overview/?utm_source=spotify&utm_medium=menu&utm_campaign=your_account"
                   target="_blank"
@@ -340,11 +349,17 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               </MenuItem>
               <MenuItem
                 _hover={{ color: "black" }}
+                _active={{ bgColor: "white", color: "black" }}
+                _focus={{ bgColor: "white", color: "black" }}
                 onClick={() => navigate(`/user/${currentUserProfileData?.id}`)}
               >
                 Profile
               </MenuItem>
-              <MenuItem _hover={{ color: "black" }}>
+              <MenuItem
+                _hover={{ color: "black" }}
+                _active={{ bgColor: "white", color: "black" }}
+                _focus={{ bgColor: "white", color: "black" }}
+              >
                 <a href="https://open.spotify.com/preferences" target="_blank">
                   Settings
                 </a>
@@ -352,6 +367,8 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
               <MenuDivider />
               <MenuItem
                 _hover={{ color: "black" }}
+                _active={{ bgColor: "white", color: "black" }}
+                _focus={{ bgColor: "white", color: "black" }}
                 onClick={() => handleLogout()}
               >
                 Log out

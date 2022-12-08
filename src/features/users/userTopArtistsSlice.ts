@@ -25,7 +25,17 @@ export const getUserTopArtists = createAsyncThunk(
 interface userTopArtistsState {
   loadingUserTopArtists: boolean;
   error: string | null;
-  userTopArtists: any;
+  userTopArtists: {
+    total: number;
+    items: {
+      name: string;
+      type: string;
+      id: string;
+      images: {
+        url: string;
+      }[];
+    }
+  } | null;
 }
 
 const initialState: userTopArtistsState = {

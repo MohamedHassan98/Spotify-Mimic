@@ -5,26 +5,17 @@ import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
 import { getFeaturedPlaylists } from "../../features/playlists/featuredPlaylistsSlice";
 import { getbrowseCategories } from "../../features/categories/browseCategoriesSlice";
 import { getNewReleases } from "../../features/releases/newReleasesSlice";
-import HomePageGrid from "../HomePageGrid/HomePageGrid";
+import Gridder from "../Gridder/Gridder";
 import NoImage from "../../assets/NoImage.png";
 
 // TODO: UPLOAD IMAGE WHILE EDITING PLAYLIST
 // TODO: MUSIC PLAYER
-// TODO: CREATE PLAYLIST, ADD AND REMOVE SONGS FROM PLAYLIST (CHECK API DOCS)
 
 // CURRENT WEBSITE FEATURES:
-// 1. LOAD PLAYLISTS, ALBUMS, ARTISTS, TRACKS, USERS, CATEGORIES, LIKED SONGS
-// 2. EDIT USER'S PLAYLIST NAME W DESCRIPTION
-// 3. SEARCH FOR SONG/ARTIST/PLAYLIST/ALBUM
-
-// HOMEPAGE: FEATURED PLAYLISTS, BROWSE CATEGORIES, NEW RELEASES (LOADS ONLY FIRST 7)
-// SEE ALL: LOAD ALL PLAYLISTS, CATEGORIES, CATEGORY PLAYLISTS, NEW RELEASES, ALBUMS, PLAYLISTS (ALL PLAYLISTS/ALBUMS)
-// SONGSPAGE: LOAD PLAYLIST SONGS, LIKED SONGS, ALBUM SONGS
-// USERPAGE: LOAD USER INFO
-// ARTISTPAGE: LOAD ARTIST INFO
-// SEARCHPAGE: SEARCH BY THE NAME OF SONG/ARTIST/PLAYLIST/ALBUM
-
-// TECH USED: VITE, TS, REACT, CHAKRA UI, REDUX TOOLKIT, AXIOS, REACT-ICONS
+// 1. LOAD PLAYLISTS, ALBUMS, ARTISTS, TRACKS, USERS, CATEGORIES, AND LIKED SONGS.
+// 2. CREATE A PLAYLIST, ADD AND REMOVE SONGS TO AN OWNED PLAYLIST.
+// 3. EDIT USER'S PLAYLIST NAME AND DESCRIPTION.
+// 4. SEARCH FOR SONG/ARTIST/PLAYLIST/ALBUM.
 
 let today = new Date();
 let currentHour = today.getHours();
@@ -109,21 +100,21 @@ const HomePage: React.FC = () => {
             </Heading>
           )}
         </SimpleGrid>
-        <HomePageGrid
+        <Gridder
           //@ts-ignore
           GridData={featuredPlaylistsData?.playlists}
           GridHeader={"Featured playlists"}
           GridSeeAll={true}
           GridType="playlist"
         />
-        <HomePageGrid
+        <Gridder
           //@ts-ignore
           GridData={browserCategoriesData?.categories}
           GridHeader={"Browse categories"}
           GridSeeAll={true}
           GridType="category"
         />
-        <HomePageGrid
+        <Gridder
           //@ts-ignore
           GridData={newReleasesData?.albums}
           GridHeader={"New releases"}

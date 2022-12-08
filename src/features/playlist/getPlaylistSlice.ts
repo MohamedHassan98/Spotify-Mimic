@@ -34,21 +34,6 @@ interface playlistState {
       display_name: string;
     };
     followers: { total: number;}
-    tracks: { 
-      total: number;
-      items: {
-        added_at: string;
-        track: {
-          name: string;
-          album: { 
-            name: string; 
-            id: string 
-          };
-          duration_ms: number;
-          artists: any;
-        };
-      }[];
-    }
     images: {
       url: string;
     }[]

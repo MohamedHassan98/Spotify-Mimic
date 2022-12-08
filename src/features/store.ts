@@ -15,13 +15,14 @@ import getAlbumDetails from "./album/getAlbumDetailsSlice";
 import getArtistAlbums from "./album/getArtistAlbumsSlice";
 import getCategoryPlaylists from "./playlists/categoryPlaylistsSlice";
 import getLikedSongsPlaylist from "./playlists/likedSongsPlaylistSlice";
-import createPlaylist from "./playlist/createPlaylistSlice";
 import getSearchResults from "./search/getSearchResultsSlice";
 import getUserTopArtists from "./users/userTopArtistsSlice";
 import getUserTopTracks from "./users/userTopTracksSlice";
 import isFollowingArtist from "./artist/isFollowingArtistSlice";
 import isFollowingUser from "./users/isFollowingUserSlice";
 import isFollowingPlaylist from "./playlist/isFollowingPlaylistSlice";
+import getPlaylistTracksData from "./playlist/getPlaylistTracksSlice";
+import getUserOwnedPlaylists from "./playlists/userOwnedPlaylistsSlice";
 
 const store = configureStore({
   reducer: {
@@ -40,13 +41,14 @@ const store = configureStore({
     getArtistAlbums,
     getCategoryPlaylists,
     getLikedSongsPlaylist,
-    createPlaylist,
     getSearchResults,
     getUserTopArtists,
     getUserTopTracks,
     isFollowingArtist,
     isFollowingUser,
-    isFollowingPlaylist
+    isFollowingPlaylist,
+    getPlaylistTracksData,
+    getUserOwnedPlaylists
   },
 });
 

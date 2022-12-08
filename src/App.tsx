@@ -6,6 +6,8 @@ import UserPage from "./components/UserPage/UserPage";
 import ArtistPage from "./components/ArtistPage/ArtistPage";
 import SeeAll from "./components/SeeAllPage/SeeAll";
 import SearchPage from "./components/SearchPage/SearchPage";
+import YourLibrary from "./components/YourLibrary/YourLibrary";
+import CreatePlaylist from "./components/CreatePlaylist/CreatePlaylist";
 
 function App() {
   return (
@@ -26,6 +28,8 @@ function App() {
               <Route path="/category/:id" element={<SeeAll />} />
               <Route path="/albums/:id" element={<SeeAll />} />
               <Route path="/search/" element={<SearchPage />} />
+              <Route path="/your-library/" element={<YourLibrary />} />
+              <Route path="/create-playlist/" element={<CreatePlaylist />} />
             </>
           ) : (
             <Route path="*" element={<LoginPage />} />

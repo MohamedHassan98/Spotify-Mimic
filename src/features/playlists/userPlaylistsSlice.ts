@@ -28,7 +28,10 @@ interface featuredPlaylistsState {
     items: {
       added_at: string;
       track: {
-        artists: any;
+        artists: {
+          id: string;
+          name: string;
+        }[];
         name: string;
         album: { name: string; id: string };
         duration_ms: number;

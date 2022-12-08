@@ -33,7 +33,7 @@ type PropsDataTypes = {
   GridType: string;
 };
 
-const HomePageGrid: React.FC<PropsDataTypes> = (props) => {
+const Gridder: React.FC<PropsDataTypes> = (props) => {
   const navigate = useNavigate();
 
   const navigateHandler = (gridType: string, id: string) => {
@@ -93,7 +93,7 @@ const HomePageGrid: React.FC<PropsDataTypes> = (props) => {
             {props.GridSeeAll ? "SEE ALL" : null}
           </Heading>
         </Box>
-        <SimpleGrid minChildWidth="200px" spacing={5}>
+        <SimpleGrid minChildWidth={{ base: "100px", sm: "200px" }} spacing={5}>
           {props.GridData ? (
             props.GridData.items.map((item) => (
               <Box
@@ -117,11 +117,11 @@ const HomePageGrid: React.FC<PropsDataTypes> = (props) => {
                     boxSize={"180px"}
                     borderRadius={item.type === "artist" ? "50%" : "lg"}
                     src={
-                      item.album?.images
+                      item.album && item.album.images[0]
                         ? item.album.images[0].url
-                        : item.images
-                        ? item.images[0]?.url
-                        : item.icons
+                        : item.images && item.images[0]
+                        ? item.images[0].url
+                        : item.icons && item.icons[0]
                         ? item.icons[0].url
                         : NoImage
                     }
@@ -190,4 +190,4 @@ const HomePageGrid: React.FC<PropsDataTypes> = (props) => {
   );
 };
 
-export default HomePageGrid;
+export default Gridder;
