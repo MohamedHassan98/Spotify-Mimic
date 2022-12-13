@@ -4,8 +4,8 @@ import axios from "axios";
 
 export const getUserProfile = createAsyncThunk(
   "users/getUserProfile",
-  async (user_id: string, thunkApi) => {
-    const USER_PROFILE_ENDPOINT = `https://api.spotify.com/v1/users/${user_id}`;
+  async (userId: string, thunkApi) => {
+    const USER_PROFILE_ENDPOINT = `https://api.spotify.com/v1/users/${userId}`;
     try {
       const response = await axios
       .get(USER_PROFILE_ENDPOINT, {

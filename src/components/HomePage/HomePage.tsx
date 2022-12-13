@@ -9,13 +9,15 @@ import Gridder from "../Gridder/Gridder";
 import NoImage from "../../assets/NoImage.png";
 
 // TODO: UPLOAD IMAGE WHILE EDITING PLAYLIST
-// TODO: MUSIC PLAYER
+// TODO: USE LOADERS AND ERRORS OF REDUX
+// TODO: UPDATE README SCREENSHOTS
 
 // CURRENT WEBSITE FEATURES:
 // 1. LOAD PLAYLISTS, ALBUMS, ARTISTS, TRACKS, USERS, CATEGORIES, AND LIKED SONGS.
 // 2. CREATE A PLAYLIST, ADD AND REMOVE SONGS TO AN OWNED PLAYLIST.
 // 3. EDIT USER'S PLAYLIST NAME AND DESCRIPTION.
 // 4. SEARCH FOR SONG/ARTIST/PLAYLIST/ALBUM.
+// 5. PLAY A 30 SECOND CLIP OF A SONG AND CONTROL ITS VOLUME AND PLAY/PAUSE FUNCTIONALITY
 
 let today = new Date();
 let currentHour = today.getHours();
@@ -39,18 +41,16 @@ const HomePage: React.FC = () => {
     dispatch(getNewReleases(7));
   }, []);
 
+  const { newReleasesData } = useAppSelector((state) => state.newReleases);
   const { createdPlaylistsData } = useAppSelector(
     (state) => state.createdPlaylists
   );
   const { featuredPlaylistsData } = useAppSelector(
     (state) => state.featuredPlaylists
   );
-
   const { browserCategoriesData } = useAppSelector(
     (state) => state.browserCategories
   );
-
-  const { newReleasesData } = useAppSelector((state) => state.newReleases);
 
   return (
     <Stack marginLeft="10px" marginTop="80px" spacing={6}>
@@ -62,7 +62,7 @@ const HomePage: React.FC = () => {
           minChildWidth={{ base: "200px", sm: "300px", md: "400px" }}
           spacing={10}
         >
-          {createdPlaylistsData && createdPlaylistsData?.total > 0 ? (
+          {createdPlaylistsData?.total! > 0 ? (
             createdPlaylistsData?.items.slice(0, 6).map((item) => (
               <Box
                 key={item.id}

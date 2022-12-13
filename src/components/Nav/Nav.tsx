@@ -56,10 +56,11 @@ function SidebarWithHeader({ children }: { children: ReactNode }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
 
   return (
-    <Box minH="100vh" bg={useColorModeValue("#121212", "gray.900")}>
+    <Box minH="90.2vh" bg={useColorModeValue("#121212", "gray.900")}>
       <SidebarContent
         onClose={() => onClose}
         display={{ base: "none", md: "block" }}
+        paddingBottom="5%"
       />
       <Drawer
         autoFocus={false}
@@ -88,7 +89,6 @@ interface SidebarProps extends BoxProps {
 
 const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
   const navigate = useNavigate();
-
   const dispatch = useAppDispatch();
 
   useEffect(() => {
@@ -127,14 +127,14 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
       {...rest}
     >
       <Flex h="20" alignItems="center" mx="8" justifyContent="center">
-        <a href="/home">
+        <button onClick={() => navigate("/home")}>
           <Image
             borderRadius="full"
             height="40px"
             src={SpotifyLogo}
             alt="Spotify Logo"
           />
-        </a>
+        </button>
         <CloseButton
           color="white"
           border="1px"
@@ -154,7 +154,7 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
         </NavItem>
       ))}
       <>
-        {createdPlaylistsData && createdPlaylistsData?.total > 0 ? (
+        {createdPlaylistsData?.total! > 0 ? (
           <>
             <Heading
               as="h1"
@@ -188,7 +188,10 @@ const SidebarContent = ({ onClose, ...rest }: SidebarProps) => {
                     color: "white",
                     cursor: "pointer",
                   }}
-                  onClick={() => navigate(`/playlist/${item.id}`)}
+                  onClick={() => {
+                    navigate(`/playlist/${item.id}`);
+                    onClose();
+                  }}
                 >
                   <Box>{item.name}</Box>
                   {item.collaborative ? (
@@ -252,16 +255,16 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
     dispatch(getCurrentUserProfile());
   }, []);
 
-  const { currentUserProfileData } = useAppSelector(
-    (state) => state.getCurrentUserProfile
-  );
-
   const handleLogout = () => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("expiresIn");
     localStorage.removeItem("tokenType");
     window.location.href = "/";
   };
+
+  const { currentUserProfileData } = useAppSelector(
+    (state) => state.getCurrentUserProfile
+  );
 
   return (
     <Flex
@@ -290,14 +293,14 @@ const MobileNav = ({ onOpen, ...rest }: MobileProps) => {
         fontFamily="monospace"
         fontWeight="bold"
       >
-        <a href="/home">
+        <button onClick={() => navigate("/home")}>
           <Image
             borderRadius="full"
             height="40px"
             src={SpotifyLogo}
             alt="Spotify Logo"
           />
-        </a>
+        </button>
       </Text>
 
       <HStack spacing={{ base: "0", md: "6" }}>

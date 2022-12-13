@@ -17,15 +17,28 @@ import SidebarWithHeader from "../Nav/Nav";
 
 const SearchPage: React.FC = () => {
   const navigate = useNavigate();
+  const dispatch = useAppDispatch();
   const [searchName, setSearchName] = useState("");
   const [searchType, setSearchType] = useState("");
   const [searchIndicator, setSearchIndicator] = useState(false);
-  const dispatch = useAppDispatch();
-  let { searchData } = useAppSelector((state) => state.getSearchResults);
 
   let searchParams = window.location.search
     .slice(3, window.location.search.length)
     .split("&");
+
+  useEffect(() => {
+    if (window.location.search.length > 0) {
+      setSearchIndicator(true);
+      setSearchName(searchParams[0]);
+      setSearchType(searchParams[1].slice(5, searchParams[1].length));
+      dispatch(
+        getSearchResults({
+          searchName: searchParams[0],
+          searchType: searchParams[1].slice(5, searchParams[1].length),
+        })
+      );
+    } else setSearchIndicator(false);
+  }, [searchIndicator]);
 
   const handleChangeSearchName = (event: { target: { value: string } }) => {
     setSearchName(event.target.value);
@@ -55,19 +68,7 @@ const SearchPage: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (window.location.search.length > 0) {
-      setSearchIndicator(true);
-      setSearchName(searchParams[0]);
-      setSearchType(searchParams[1].slice(5, searchParams[1].length));
-      dispatch(
-        getSearchResults({
-          searchName: searchParams[0],
-          searchType: searchParams[1].slice(5, searchParams[1].length),
-        })
-      );
-    } else setSearchIndicator(false);
-  }, [searchIndicator]);
+  let { searchData } = useAppSelector((state) => state.getSearchResults);
 
   return (
     <>

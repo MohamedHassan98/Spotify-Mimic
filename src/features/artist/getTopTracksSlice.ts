@@ -26,8 +26,15 @@ interface getTopTracksState {
   error: string | null;
   topTracksData: {
     tracks: {
-      name: string; 
-      duration_ms: number 
+      preview_url: string;
+      artists: any;
+      album: {
+        images: {
+          url: string;
+        }[];
+      }
+      name: string;
+      duration_ms: number;
     }[]} | null;
 }
 

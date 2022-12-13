@@ -23,6 +23,7 @@ import isFollowingUser from "./users/isFollowingUserSlice";
 import isFollowingPlaylist from "./playlist/isFollowingPlaylistSlice";
 import getPlaylistTracksData from "./playlist/getPlaylistTracksSlice";
 import getUserOwnedPlaylists from "./playlists/userOwnedPlaylistsSlice";
+import newSongPlaying from "./player/player";
 
 const store = configureStore({
   reducer: {
@@ -48,7 +49,8 @@ const store = configureStore({
     isFollowingUser,
     isFollowingPlaylist,
     getPlaylistTracksData,
-    getUserOwnedPlaylists
+    getUserOwnedPlaylists,
+    newSongPlaying,
   },
 });
 

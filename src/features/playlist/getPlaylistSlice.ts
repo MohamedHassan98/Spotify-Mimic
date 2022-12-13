@@ -4,8 +4,8 @@ import axios from "axios";
 
 export const getPlaylistData = createAsyncThunk(
   "playlist/getPlaylistData",
-  async (playlist_id: string | undefined, thunkApi) => {
-    const GET_PLAYLIST_ENDPOINT = `https://api.spotify.com/v1/playlists/${playlist_id}`;
+  async (playlistId: string, thunkApi) => {
+    const GET_PLAYLIST_ENDPOINT = `https://api.spotify.com/v1/playlists/${playlistId}`;
     try {
       const response = await axios
       .get(GET_PLAYLIST_ENDPOINT, {

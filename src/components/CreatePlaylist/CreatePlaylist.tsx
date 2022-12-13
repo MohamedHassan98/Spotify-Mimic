@@ -1,11 +1,13 @@
 import { Stack, Input, InputGroup, Checkbox, Button } from "@chakra-ui/react";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useAppDispatch } from "../../hooks/useTypedSelector";
 import { createPlaylist } from "../../features/playlist/createPlaylist";
 import SidebarWithHeader from "../Nav/Nav";
 
 const SearchPage: React.FC = () => {
   const dispatch = useAppDispatch();
+  const navigate = useNavigate();
   const [playlistName, setplaylistName] = useState("My Playlist");
   const [playlistDescription, setplaylistDescription] = useState("");
   const [publicBool, setpublicBool] = useState(false);
@@ -38,7 +40,7 @@ const SearchPage: React.FC = () => {
         playlistCollaborative: collaborativeBool,
       })
     );
-    window.location.href = "/home";
+    navigate("/home");
   };
 
   return (

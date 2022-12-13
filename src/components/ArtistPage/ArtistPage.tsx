@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { GoVerified } from "react-icons/go";
 import { useNavigate, useParams } from "react-router-dom";
 import {
@@ -24,6 +24,7 @@ import { getArtistAlbums } from "../../features/album/getArtistAlbumsSlice";
 import { followArtist } from "../../features/artist/followArtist";
 import { isFollowingArtist } from "../../features/artist/isFollowingArtistSlice";
 import { unfollowArtist } from "../../features/artist/unfollowArtist";
+import { newSongPlaying } from "../../features/player/player";
 import SidebarWithHeader from "../Nav/Nav";
 import NoImage from "../../assets/NoImage.png";
 
@@ -31,44 +32,56 @@ const ArtistPage: React.FC = () => {
   const idParam = useParams();
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
-  const [followIndicator, setFollowIndicator] = useState(false);
-
-  const { isFollowingArtistData } = useAppSelector(
-    (state) => state.isFollowingArtist
-  );
 
   useEffect(() => {
     window.scrollTo(0, 0);
     dispatch(getArtist(`${idParam.id}`));
     dispatch(getTopTracks(`${idParam.id}`));
     dispatch(getRelatedArtists(`${idParam.id}`));
-    dispatch(getArtistAlbums({ artistId: idParam.id, limitNumber: 7 }));
+    dispatch(getArtistAlbums({ artistId: idParam.id!, limitNumber: 7 }));
     dispatch(isFollowingArtist(`${idParam.id}`));
-  }, [idParam.id, followIndicator]);
+  }, [idParam.id]);
 
-  const followArtistHandler = () => {
-    dispatch(followArtist(`${idParam.id}`));
-    setFollowIndicator(!followIndicator);
+  async function followArtistHandler() {
+    await dispatch(followArtist(`${idParam.id}`));
+    dispatch(isFollowingArtist(`${idParam.id}`));
+  }
+
+  async function unfollowArtistHandler() {
+    await dispatch(unfollowArtist(`${idParam.id}`));
+    dispatch(isFollowingArtist(`${idParam.id}`));
+  }
+
+  const convertMinutes = (millis: number) => {
+    let minutes: number = Math.floor(millis / 60000);
+    let seconds: number = Number(((millis % 60000) / 1000).toFixed(0));
+    return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
   };
 
-  const unfollowArtistHandler = () => {
-    dispatch(unfollowArtist(`${idParam.id}`));
-    setFollowIndicator(!followIndicator);
+  const playTrack = (
+    songURI: string,
+    songImage: string,
+    songArtists: [],
+    songName: string
+  ) => {
+    let trackObject = {
+      songURI: songURI,
+      songImage: songImage,
+      songArtists: songArtists,
+      songName: songName,
+    };
+    dispatch(newSongPlaying(trackObject));
   };
 
   const { artistData } = useAppSelector((state) => state.getArtist);
   const { topTracksData } = useAppSelector((state) => state.getTopTracks);
+  const { albumsData } = useAppSelector((state) => state.getArtistAlbums);
   const { relatedArtistsData } = useAppSelector(
     (state) => state.getRelatedArtists
   );
-  const { albumsData } = useAppSelector((state) => state.getArtistAlbums);
-
-  const convertMinutes = (millis: number) => {
-    let minutes: number = Math.floor(millis / 60000);
-    //@ts-ignore
-    let seconds: number = ((millis % 60000) / 1000).toFixed(0);
-    return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
-  };
+  const { isFollowingArtistData } = useAppSelector(
+    (state) => state.isFollowingArtist
+  );
 
   return (
     <>
@@ -105,75 +118,94 @@ const ArtistPage: React.FC = () => {
                   {artistData?.name}
                 </Heading>
               </GridItem>
-              <GridItem color="white" fontSize={"16px"} fontWeight="medium">
-                {artistData?.followers.total.toLocaleString()} Followers
-                {isFollowingArtistData ? (
-                  isFollowingArtistData[0] === false ? (
-                    <Button
-                      marginLeft={"10px"}
-                      colorScheme="white"
-                      variant="outline"
-                      fontSize={"13px"}
-                      height="30px"
-                      borderColor={"gray"}
-                      onClick={() => followArtistHandler()}
-                    >
-                      FOLLOW
-                    </Button>
-                  ) : (
-                    <Button
-                      marginLeft={"10px"}
-                      colorScheme="white"
-                      variant="outline"
-                      fontSize={"13px"}
-                      height="30px"
-                      borderColor={"gray"}
-                      onClick={() => unfollowArtistHandler()}
-                    >
-                      FOLLOWING
-                    </Button>
-                  )
-                ) : null}
-              </GridItem>
+              {artistData?.followers.total ? (
+                <GridItem color="white" fontSize={"16px"} fontWeight="medium">
+                  {artistData?.followers.total.toLocaleString()} Followers
+                  {isFollowingArtistData ? (
+                    isFollowingArtistData[0] === false ? (
+                      <Button
+                        marginLeft={"10px"}
+                        colorScheme="white"
+                        variant="outline"
+                        fontSize={"13px"}
+                        height="30px"
+                        borderColor={"gray"}
+                        onClick={() => followArtistHandler()}
+                      >
+                        FOLLOW
+                      </Button>
+                    ) : (
+                      <Button
+                        marginLeft={"10px"}
+                        colorScheme="white"
+                        variant="outline"
+                        fontSize={"13px"}
+                        height="30px"
+                        borderColor={"gray"}
+                        onClick={() => unfollowArtistHandler()}
+                      >
+                        FOLLOWING
+                      </Button>
+                    )
+                  ) : null}
+                </GridItem>
+              ) : null}
             </Grid>
-            <Heading color="white" size="md" paddingTop={"20px"}>
-              Popular
-            </Heading>
-            <TableContainer>
-              <Table variant="unstyled" color="White">
-                <Tbody>
-                  {topTracksData?.tracks.map((track, id: number) => (
-                    <Tr
-                      key={id}
-                      _hover={{
-                        bgColor: "#282828",
-                      }}
-                    >
-                      <Td>{id + 1}</Td>
-                      <Td>{track.name}</Td>
-                      <Td>{convertMinutes(track.duration_ms)}</Td>
-                    </Tr>
-                  ))}
-                </Tbody>
-              </Table>
-            </TableContainer>
+            {topTracksData ? (
+              <>
+                <Heading color="white" size="md" paddingTop={"20px"}>
+                  Popular
+                </Heading>
+                <TableContainer>
+                  <Table variant="unstyled" color="White">
+                    <Tbody>
+                      {topTracksData.tracks.map((track, id: number) => (
+                        <Tr
+                          key={id}
+                          _hover={{
+                            bgColor: "#282828",
+                          }}
+                        >
+                          <Td>{id + 1}</Td>
+                          <Td
+                            _hover={{
+                              textDecoration: "underline",
+                              cursor: "pointer",
+                            }}
+                            onClick={() =>
+                              playTrack(
+                                track.preview_url,
+                                track.album.images[0].url,
+                                track.artists,
+                                track.name
+                              )
+                            }
+                          >
+                            {track.name}
+                          </Td>
+                          <Td>{convertMinutes(track.duration_ms)}</Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </TableContainer>
+              </>
+            ) : null}
             <Box display={"flex"} alignItems="center">
               <Heading paddingTop={"20px"} color="white" as="h2" size="md">
                 Albums
               </Heading>
-              {albumsData ? (
-                albumsData.total > 7 ? (
-                  <Heading
-                    onClick={() => navigate(`/albums/${idParam.id}`)}
-                    marginLeft={"auto"}
-                    color="gray"
-                    as="span"
-                    size="xs"
-                    _hover={{ cursor: "pointer" }}
-                  >
-                    SEE ALL
-                  </Heading>
-                ) : null
+              {albumsData?.total! > 7 ? (
+                <Heading
+                  onClick={() => navigate(`/albums/${idParam.id}`)}
+                  marginLeft={"auto"}
+                  color="gray"
+                  as="span"
+                  size="xs"
+                  _hover={{ cursor: "pointer" }}
+                >
+                  SEE ALL
+                </Heading>
               ) : null}
             </Box>
             <SimpleGrid minChildWidth="200px" spacing={5}>
@@ -215,18 +247,16 @@ const ArtistPage: React.FC = () => {
                       >
                         {item.name}
                       </Box>
-                      {item.total_tracks ? (
-                        <Box
-                          as="span"
-                          color="gray.500"
-                          fontSize="sm"
-                          noOfLines={2}
-                        >
-                          {item.album_type === "album"
-                            ? "Album (" + item.total_tracks + " Tracks)"
-                            : "Single"}
-                        </Box>
-                      ) : null}
+                      <Box
+                        as="span"
+                        color="gray.500"
+                        fontSize="sm"
+                        noOfLines={2}
+                      >
+                        {item.album_type === "album"
+                          ? "Album (" + item.total_tracks + " Tracks)"
+                          : "Single"}
+                      </Box>
                     </>
                   </Box>
                 ))
@@ -240,67 +270,63 @@ const ArtistPage: React.FC = () => {
               Fans also like
             </Heading>
             <SimpleGrid minChildWidth="200px" spacing={5}>
-              {relatedArtistsData ? (
-                relatedArtistsData.artists.length > 0 ? (
-                  relatedArtistsData?.artists.map((artist) => (
-                    <Box
-                      key={artist.id}
-                      maxW="200px"
-                      padding="10px"
-                      borderRadius="lg"
-                      borderColor={"#181818"}
-                      bgColor="#181818"
-                      overflow="hidden"
-                      _hover={{
-                        bgColor: "#282828",
-                      }}
-                    >
-                      <>
-                        <Image
-                          _hover={{
-                            cursor: "pointer",
-                          }}
-                          onClick={() => navigate(`/artist/${artist.id}`)}
-                          boxSize={"180px"}
-                          borderRadius="50%"
-                          src={
-                            artist.images[0] ? artist.images[0].url : NoImage
-                          }
-                          alt={`${artist.name} Cover Photo`}
-                        />
-                        <Box
-                          _hover={{
-                            cursor: "pointer",
-                          }}
-                          onClick={() => navigate(`/artist/${artist.id}`)}
-                          color="white"
-                          marginTop="15px"
-                          fontWeight="semibold"
-                          as="h3"
-                          noOfLines={2}
-                          width="-webkit-fit-content"
-                        >
-                          {artist.name}
-                        </Box>
-                        <Box
-                          as="span"
-                          color="gray"
-                          fontSize="sm"
-                          fontWeight={"medium"}
-                          noOfLines={2}
-                        >
-                          {artist.type.charAt(0).toUpperCase() +
-                            artist.type.slice(1)}
-                        </Box>
-                      </>
-                    </Box>
-                  ))
-                ) : (
-                  <Heading color="white" as="h3" size="sm" noOfLines={1}>
-                    No related artists found
-                  </Heading>
-                )
-              ) : null}
+              {relatedArtistsData?.artists.length! > 0 ? (
+                relatedArtistsData?.artists.map((artist) => (
+                  <Box
+                    key={artist.id}
+                    maxW="200px"
+                    padding="10px"
+                    borderRadius="lg"
+                    borderColor={"#181818"}
+                    bgColor="#181818"
+                    overflow="hidden"
+                    _hover={{
+                      bgColor: "#282828",
+                    }}
+                  >
+                    <>
+                      <Image
+                        _hover={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => navigate(`/artist/${artist.id}`)}
+                        boxSize={"180px"}
+                        borderRadius="50%"
+                        src={artist.images[0] ? artist.images[0].url : NoImage}
+                        alt={`${artist.name} Cover Photo`}
+                      />
+                      <Box
+                        _hover={{
+                          cursor: "pointer",
+                        }}
+                        onClick={() => navigate(`/artist/${artist.id}`)}
+                        color="white"
+                        marginTop="15px"
+                        fontWeight="semibold"
+                        as="h3"
+                        noOfLines={2}
+                        width="-webkit-fit-content"
+                      >
+                        {artist.name}
+                      </Box>
+                      <Box
+                        as="span"
+                        color="gray"
+                        fontSize="sm"
+                        fontWeight={"medium"}
+                        noOfLines={2}
+                      >
+                        {artist.type.charAt(0).toUpperCase() +
+                          artist.type.slice(1)}
+                      </Box>
+                    </>
+                  </Box>
+                ))
+              ) : (
+                <Heading color="white" as="h3" size="sm" noOfLines={1}>
+                  No related artists found
+                </Heading>
+              )}
             </SimpleGrid>
           </Stack>
         }

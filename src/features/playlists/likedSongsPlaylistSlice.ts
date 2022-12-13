@@ -29,10 +29,17 @@ interface likedSongsPlaylistState {
     items: {
       added_at: string;
       track: {
+        preview_url: string;
         artists: any;
         name: string;
         uri: string;
-        album: { name: string; id: string };
+        album: { 
+          name: string; 
+          id: string; 
+          images: { 
+            url: string;
+          }[] 
+        };
         duration_ms: number;
         };
     }[]

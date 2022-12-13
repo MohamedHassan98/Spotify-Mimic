@@ -2,29 +2,23 @@ import { Stack, Heading } from "@chakra-ui/react";
 import { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
 import { useAppDispatch, useAppSelector } from "../../hooks/useTypedSelector";
-import { getUserProfile } from "../../features/users/userProfileSlice";
 import { getUserPlaylists } from "../../features/playlists/userPlaylistsSlice";
 import SidebarWithHeader from "../Nav/Nav";
 import Gridder from "../Gridder/Gridder";
 
 const YourLibrary: React.FC = () => {
-  let userId = localStorage.getItem("userId");
   const dispatch = useAppDispatch();
   const [itemOffset, setItemOffset] = useState(0);
 
   useEffect(() => {
-    if (userId) {
-      dispatch(getUserProfile(userId));
-      dispatch(
-        getUserPlaylists({ user_id: userId, limitNumber: 50, offsetNumber: 0 })
-      );
-    }
+    dispatch(
+      getUserPlaylists({
+        userId: localStorage.getItem("userId")!,
+        limitNumber: 50,
+        offsetNumber: 0,
+      })
+    );
   }, []);
-
-  const { userProfileData } = useAppSelector((state) => state.getUserProfile);
-  const { userPlaylistsData } = useAppSelector(
-    (state) => state.getUserPlaylists
-  );
 
   const handlePageClick = (event: { selected: number }) => {
     const newOffset = userPlaylistsData
@@ -33,7 +27,7 @@ const YourLibrary: React.FC = () => {
     setItemOffset(newOffset);
     dispatch(
       getUserPlaylists({
-        user_id: userId ? userId : " ",
+        userId: localStorage.getItem("userId")!,
         limitNumber: 50,
         offsetNumber: newOffset,
       })
@@ -41,11 +35,15 @@ const YourLibrary: React.FC = () => {
     window.scrollTo(0, 0);
   };
 
+  const { userPlaylistsData } = useAppSelector(
+    (state) => state.getUserPlaylists
+  );
+
   return (
     <>
       <SidebarWithHeader
         children={
-          userPlaylistsData && userProfileData ? (
+          userPlaylistsData ? (
             <Stack marginLeft="10px" marginTop="80px" spacing={6}>
               {userPlaylistsData?.total > 0 ? (
                 <>
@@ -56,16 +54,14 @@ const YourLibrary: React.FC = () => {
                     GridSeeAll={false}
                     GridType="playlist"
                   />
-                  {userPlaylistsData && userPlaylistsData?.total > 50 ? (
+                  {userPlaylistsData?.total > 50 ? (
                     <ReactPaginate
                       breakLabel="..."
                       nextLabel="Next"
                       onPageChange={handlePageClick}
-                      pageRangeDisplayed={5}
-                      pageCount={
-                        userPlaylistsData &&
-                        Math.ceil(userPlaylistsData?.total / 50)
-                      }
+                      pageRangeDisplayed={2}
+                      marginPagesDisplayed={2}
+                      pageCount={Math.ceil(userPlaylistsData?.total / 50)}
                       previousLabel="Previous"
                       renderOnZeroPageCount={undefined}
                       containerClassName={"pagination"}

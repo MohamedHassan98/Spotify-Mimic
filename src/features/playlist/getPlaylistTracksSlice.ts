@@ -4,8 +4,8 @@ import axios from "axios";
 
 export const getPlaylistTracksData = createAsyncThunk(
   "playlist/getPlaylistTracksData",
-  async (playlistDetails: {playlist_id: string, playlistOffset: number}, thunkApi) => {
-    const GET_PLAYLIST_TRACKS_ENDPOINT = `https://api.spotify.com/v1/playlists/${playlistDetails.playlist_id}/tracks?limit=100&offset=${playlistDetails.playlistOffset}`;
+  async (playlistDetails: {playlistId: string, playlistOffset: number}, thunkApi) => {
+    const GET_PLAYLIST_TRACKS_ENDPOINT = `https://api.spotify.com/v1/playlists/${playlistDetails.playlistId}/tracks?limit=100&offset=${playlistDetails.playlistOffset}`;
     try {
       const response = await axios
       .get(GET_PLAYLIST_TRACKS_ENDPOINT, {
@@ -29,9 +29,13 @@ interface playlistTracksState {
     items: {
       added_at: string;
       track: {
+        preview_url: string;
         name: string;
         uri: string;
-        album: { 
+        album: {
+          images: {
+            url: string;
+          }[];
           name: string; 
           id: string 
         };

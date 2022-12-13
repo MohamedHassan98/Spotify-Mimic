@@ -1,0 +1,9 @@
+.router-div {
+  margin-bottom: 95px;
+}
+
+@media screen and (max-width: 767px) {
+  .router-div {
+    margin-bottom: 256px;
+  }
+}

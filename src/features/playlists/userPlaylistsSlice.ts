@@ -3,8 +3,8 @@ import axios from "axios";
 
 export const getUserPlaylists = createAsyncThunk(
   "playlists/getUserPlaylists",
-  async (user: {user_id: string | undefined, limitNumber: number, offsetNumber: number},thunkApi) => {
-    const USER_PLAYLISTS_ENDPOINT = `https://api.spotify.com/v1/users/${user.user_id}/playlists?limit=${user.limitNumber}&offset=${user.offsetNumber}`;
+  async (user: {userId: string, limitNumber: number, offsetNumber: number},thunkApi) => {
+    const USER_PLAYLISTS_ENDPOINT = `https://api.spotify.com/v1/users/${user.userId}/playlists?limit=${user.limitNumber}&offset=${user.offsetNumber}`;
     try {
       const response = await axios
       .get(USER_PLAYLISTS_ENDPOINT, {

@@ -25,43 +25,36 @@ import UserProfileDefault from "../../assets/UserProfileDefault.png";
 const UserPage: React.FC = () => {
   const idParam = useParams();
   const dispatch = useAppDispatch();
-  const [followIndicator, setFollowIndicator] = useState(false);
   const [itemOffset, setItemOffset] = useState(0);
 
   useEffect(() => {
-    let userId = idParam?.id;
-    if (idParam?.id) {
-      dispatch(getUserProfile(idParam.id));
-      dispatch(
-        getUserPlaylists({ user_id: userId, limitNumber: 50, offsetNumber: 0 })
-      );
+    dispatch(getUserProfile(idParam?.id!));
+    dispatch(
+      getUserPlaylists({
+        userId: idParam?.id!,
+        limitNumber: 50,
+        offsetNumber: 0,
+      })
+    );
+    if (idParam?.id !== localStorage.getItem("userId")) {
+      dispatch(isFollowingUser(`${idParam?.id}`));
+    } else {
       dispatch(getUserTopArtists());
       dispatch(getUserTopTracks());
-      if (idParam.id !== localStorage.getItem("userId")) {
-        dispatch(isFollowingUser(`${idParam.id}`));
-      }
     }
-  }, [idParam.id, followIndicator]);
+  }, [idParam.id]);
 
-  const { userProfileData } = useAppSelector((state) => state.getUserProfile);
-  const { userPlaylistsData } = useAppSelector(
-    (state) => state.getUserPlaylists
-  );
-  const { userTopArtists } = useAppSelector((state) => state.getUserTopArtists);
-  const { userTopTracks } = useAppSelector((state) => state.getUserTopTracks);
-  const { isFollowingUserData } = useAppSelector(
-    (state) => state.isFollowingUser
-  );
+  async function followUserHandler() {
+    await dispatch(followUser(`${idParam.id}`));
+    dispatch(getUserProfile(idParam?.id!));
+    dispatch(isFollowingUser(`${idParam?.id}`));
+  }
 
-  const followUserHandler = () => {
-    dispatch(followUser(`${idParam.id}`));
-    setFollowIndicator(!followIndicator);
-  };
-
-  const unfollowUserHandler = () => {
-    dispatch(unfollowUser(`${idParam.id}`));
-    setFollowIndicator(!followIndicator);
-  };
+  async function unfollowUserHandler() {
+    await dispatch(unfollowUser(`${idParam.id}`));
+    dispatch(getUserProfile(idParam?.id!));
+    dispatch(isFollowingUser(`${idParam?.id}`));
+  }
 
   const handlePageClick = (event: { selected: number }) => {
     const newOffset = userPlaylistsData
@@ -70,13 +63,23 @@ const UserPage: React.FC = () => {
     setItemOffset(newOffset);
     dispatch(
       getUserPlaylists({
-        user_id: idParam.id ? idParam.id : "",
+        userId: idParam.id!,
         limitNumber: 50,
         offsetNumber: newOffset,
       })
     );
     window.scrollTo(0, 0);
   };
+
+  const { userProfileData } = useAppSelector((state) => state.getUserProfile);
+  const { userTopArtists } = useAppSelector((state) => state.getUserTopArtists);
+  const { userTopTracks } = useAppSelector((state) => state.getUserTopTracks);
+  const { userPlaylistsData } = useAppSelector(
+    (state) => state.getUserPlaylists
+  );
+  const { isFollowingUserData } = useAppSelector(
+    (state) => state.isFollowingUser
+  );
 
   return (
     <>
@@ -192,7 +195,7 @@ const UserPage: React.FC = () => {
               </Grid>
               {idParam.id === localStorage.getItem("userId") ? (
                 <>
-                  {userTopArtists && userTopArtists?.total > 0 ? (
+                  {userTopArtists?.total! > 0 ? (
                     <Gridder
                       GridHeader="Top Played Artists"
                       //@ts-ignore
@@ -205,7 +208,7 @@ const UserPage: React.FC = () => {
                       No top played artists yet
                     </Heading>
                   )}
-                  {userTopTracks && userTopTracks?.total > 0 ? (
+                  {userTopTracks?.total! > 0 ? (
                     <Gridder
                       GridHeader="Top Played Tracks"
                       //@ts-ignore
@@ -229,16 +232,14 @@ const UserPage: React.FC = () => {
                     GridSeeAll={false}
                     GridType="playlist"
                   />
-                  {userPlaylistsData && userPlaylistsData?.total > 50 ? (
+                  {userPlaylistsData?.total! > 50 ? (
                     <ReactPaginate
                       breakLabel="..."
                       nextLabel="Next"
                       onPageChange={handlePageClick}
-                      pageRangeDisplayed={5}
-                      pageCount={
-                        userPlaylistsData &&
-                        Math.ceil(userPlaylistsData?.total / 50)
-                      }
+                      pageRangeDisplayed={2}
+                      marginPagesDisplayed={2}
+                      pageCount={Math.ceil(userPlaylistsData?.total / 50)}
                       previousLabel="Previous"
                       renderOnZeroPageCount={undefined}
                       containerClassName={"pagination"}

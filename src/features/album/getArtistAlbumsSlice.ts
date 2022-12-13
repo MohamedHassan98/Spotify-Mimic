@@ -4,7 +4,7 @@ import axios from "axios";
 
 export const getArtistAlbums = createAsyncThunk(
   "album/getArtistAlbums",
-  async (artistAlbumsData: { artistId: string | undefined; limitNumber: number }, thunkApi) => {
+  async (artistAlbumsData: { artistId: string; limitNumber: number }, thunkApi) => {
     const GET_ARTIST_ALBUMS_ENDPOINT = `https://api.spotify.com/v1/artists/${artistAlbumsData.artistId}/albums?include_groups=single%2Calbum&limit=${artistAlbumsData.limitNumber}`;
     try {
       const response = await axios
